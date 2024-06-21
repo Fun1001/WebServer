@@ -48,18 +48,18 @@ private:
 
     int _MAX_LINES;
 
-    int _lineCount;
-    int _toDay;
+    int _lineCount;                                     //日志行数记录
+    int _toDay;                                         //日志按天分类，记录当前是哪一天
     bool _b_isOpen;
 
     Buffer _buff;
     int level;
-    bool b_isAsync;
+    bool b_isAsync;                                     //是否是异步           
 
-    FILE* _fp;
-    std::unique_ptr<BlockDeque<std::string>> _deque;
-    std::unique_ptr<std::thread> _writeThread;
-    std::mutex _mutex;
+    FILE* _fp;                                          //打开log的文件指针
+    std::unique_ptr<BlockDeque<std::string>> _deque;    //阻塞队列
+    std::unique_ptr<std::thread> _writeThread;          
+    std::mutex _mutex;                      
 };
 
 #define LOG_BASE(level, format, ...) \
