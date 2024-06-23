@@ -53,8 +53,8 @@ private:
     bool _b_isOpen;
 
     Buffer _buff;
-    int level;
-    bool b_isAsync;                                     //是否是异步           
+    int _level;
+    bool _b_isAsync;                                     //是否是异步           
 
     FILE* _fp;                                          //打开log的文件指针
     std::unique_ptr<BlockDeque<std::string>> _deque;    //阻塞队列

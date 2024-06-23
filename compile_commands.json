@@ -1,0 +1,53 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++20",
+      "-O2",
+      "-Wall",
+      "-g",
+      "-pthread",
+      "-o",
+      "./bin/server",
+      "./log/log.cpp"
+    ],
+    "directory": "/home/jiuchuan/WebServer",
+    "file": "/home/jiuchuan/WebServer/log/log.cpp",
+    "output": "/home/jiuchuan/WebServer/bin/server"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++20",
+      "-O2",
+      "-Wall",
+      "-g",
+      "-pthread",
+      "-o",
+      "./bin/server",
+      "./buffer/buffer.cpp"
+    ],
+    "directory": "/home/jiuchuan/WebServer",
+    "file": "/home/jiuchuan/WebServer/buffer/buffer.cpp",
+    "output": "/home/jiuchuan/WebServer/bin/server"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++20",
+      "-O2",
+      "-Wall",
+      "-g",
+      "-pthread",
+      "-o",
+      "./bin/server",
+      "./main.cpp"
+    ],
+    "directory": "/home/jiuchuan/WebServer",
+    "file": "/home/jiuchuan/WebServer/main.cpp",
+    "output": "/home/jiuchuan/WebServer/bin/server"
+  }
+]

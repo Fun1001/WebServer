@@ -182,7 +182,7 @@ void Buffer::_MakeSpace(size_t len)
 {   
     //目前可写的位置和已读的位置加起来都不够需要的空间
     if(WritableBytes() + PrependableBytes() < len){
-        _buffer.resize(_writePos + len + 1)；
+        _buffer.resize(_writePos + len + 1);
     }
     //可写的位置和已读的位置加起来够空间，不需要开辟空间
     else{
