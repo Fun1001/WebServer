@@ -44,15 +44,19 @@ void Log::SetLevel(int level){
 }
 
 //初始化
-void Log::init(int level = 1, const char* path, const char* suffix, int maxQueueCapacity):
-    _b_isOpen(true), _level(level), _lineCount(0), _path(path), _suffix(suffix)
+void Log::init(int level = 1, const char* path, const char* suffix, int maxQueueCapacity)
 {
+    _b_isOpen = true;
+    _level = level;
+    
     if(maxQueueCapacity > 0){
         _b_isAsync = true;
         if(!_deque){
+            //创建阻塞队列
             std::unique_ptr<BlockDeque<std::string>> newDeque = std::make_unique<BlockDeque<std::string>>();
             _deque = std::move(newDeque);
 
+            /*创建一个新线程，执行异步写入文件函数*/
             std::unique_ptr<std::thread> NewThread = std::make_unique<std::thread>(FlushLogThread);
             _writeThread = std::move(NewThread);
         }
@@ -61,10 +65,14 @@ void Log::init(int level = 1, const char* path, const char* suffix, int maxQueue
         _b_isAsync =false;
     }
 
-    time_t timer = time(nullptr);
+    _lineCount = 0;
 
+    /*创建strcut tm变量接收当下时间*/
+    time_t timer = time(nullptr);
     struct tm* sysTime = localtime(&timer);
     struct tm t = *sysTime;
+    _path = path;
+    _suffix = suffix;
 
     // 格式化日志文件名
     char fileName[LOG_NAME_LEN] = {[0]=0};
@@ -98,20 +106,22 @@ void Log::write(int level, const char* format,...){
     va_list valist;
 
     //日志日期，行数
-    if(_toDay != t.tm_mday || (_lineCount && (_lineCount % _MAX_LINES == 0))){
+    /*如果是新的一天了，或者日志行数到上限了，创建新日志*/
+    if(_toDay != t.tm_mday || (_lineCount && (_lineCount % MAX_LINES == 0))){
         std::unique_lock<std::mutex> uniquelock(_mutex);
         uniquelock.unlock();
 
         char newFile[LOG_NAME_LEN];
-        char tail[36] = {[0]=0};
+        char tail[36] = {[0] = 0};
         snprintf(tail, 36, "%04d_%02d_%02d", t.tm_year + 1900, t.tm_mon + 1, t.tm_mday);
 
+        //新的一天
         if(_toDay != t.tm_mday){
             snprintf(newFile, LOG_NAME_LEN - 72, "%s/%s%s", _path, tail, _suffix);
             _toDay = t.tm_mday;
             _lineCount = 0;
         }
-        else {
+        else {//日志写满了
             snprintf(newFile, LOG_NAME_LEN - 72, "%s/%s-%d%s", _path, tail, (_lineCount  / MAX_LINES), _suffix);
         }
 
@@ -125,6 +135,7 @@ void Log::write(int level, const char* format,...){
     {
         std::unique_lock<std::mutex> uniquelock(_mutex);
         _lineCount++;
+        /*写每一行的开头格式*/
         int n = snprintf(_buff.BeginWrite(), 128, "%d-%02d-%02d %02d:%02d:%02d.%06ld ",
                     t.tm_year + 1900, t.tm_mon + 1, t.tm_mday,
                     t.tm_hour, t.tm_min, t.tm_sec, now.tv_usec);
@@ -132,13 +143,16 @@ void Log::write(int level, const char* format,...){
         _buff.HasWritten(n);
         AppendLogLevelTitle_(level);
 
+        /*可变参数定义初始化，在vsprintf时使用，作用：输入具体的日志内容*/
         va_start(valist, format);
         int m = vsnprintf(_buff.BeginWrite(), _buff.WritableBytes(), format, valist);
         va_end(valist);
-
+        
+         /*加入换行和空格*/
         _buff.HasWritten(m);
         _buff.Append("\n\0", 2);
 
+        /*决定是异步写还是同步写*/
         if(_b_isAsync && _deque && !_deque->full()){
             _deque->push_back(_buff.RetrieveAllToStr());
         }
@@ -180,9 +194,10 @@ void Log::flush(){
 
 void Log::AsyncWrite(){
     std::string str = "";
+    /*循环从阻塞队列里获取资源*/
     while (_deque->pop(str)) {
         std::lock_guard<std::mutex> lock(_mutex);
-        fputs(str.c_str(), _fp);
+        fputs(str.c_str(), _fp);//将c_str()输出到_fp指向的文件中
     }
 }
 

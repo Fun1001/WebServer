@@ -16,7 +16,7 @@
 #include "../Singleton/Singleton.h"
 #include "../buffer/buffer.h"
 
-class Log :public Singleton<Log>{
+class Log : public Singleton<Log> {
     friend class Singleton<Log>;
 
 public:
@@ -32,10 +32,15 @@ public:
 
     bool IsOpen() {return _b_isOpen;}
 
-private:
-    Log();
-    void AppendLogLevelTitle_(int level);
     virtual ~Log();
+
+protected:
+    
+    Log();
+
+private:
+    
+    void AppendLogLevelTitle_(int level);
     void AsyncWrite();
 
 private:
@@ -64,7 +69,7 @@ private:
 
 #define LOG_BASE(level, format, ...) \
     do {\
-        Log* log = Log::Instance();\
+        std::shared_ptr<Log> log = Log::GetInstance();\
         if (log->IsOpen() && log->GetLevel() <= level) {\
             log->write(level, format, ##__VA_ARGS__); \
             log->flush();\
