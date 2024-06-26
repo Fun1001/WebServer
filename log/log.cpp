@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <ctime>
+#include <iostream>
 #include <memory>
 #include <mutex>
 #include <semaphore.h>
@@ -169,10 +170,10 @@ void Log::AppendLogLevelTitle_(int level) {
         _buff.Append("[debug]: ", 9);
         break;
     case 1:
-        _buff.Append("[info]: ", 9);
+        _buff.Append("[info]: ", 8);
         break;
     case 2:
-        _buff.Append("[warn]: ", 9);
+        _buff.Append("[warn]: ", 8); //长度必须对应上
         break;
     case 3:
         _buff.Append("[error]: ", 9);

@@ -2,7 +2,7 @@
  * @Author: Jiuchuan jiuchuanfun@gmail.com
  * @Date: 2024-06-24 20:41:16
  * @LastEditors: Jiuchuan jiuchuanfun@gmail.com
- * @LastEditTime: 2024-06-26 18:14:07
+ * @LastEditTime: 2024-06-26 23:04:25
  * @FilePath: /WebServer/pool/sqlconnpool.cpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -19,14 +19,6 @@
 #include <utility>
 #include "cppconn/statement.h"
 
-SqlConnPool::~SqlConnPool()
-{
-    std::unique_lock<std::mutex> lock(_mutex);
-    while (!_connPool.empty()) {
-        _connPool.pop();
-    }
-}
-
 void SqlConnPool::checkConnection()
 {
     std::lock_guard<std::mutex> lock(_mutex);
@@ -39,7 +31,7 @@ void SqlConnPool::checkConnection()
     {
         auto con = std::move(_connPool.front());
         _connPool.pop();
-
+        
         Defer defer([this, &con](){
             _connPool.push(std::move(con));
         });
@@ -47,7 +39,7 @@ void SqlConnPool::checkConnection()
         if(timestamp - con->_last_oper_time < 600){
             continue;
         }
-
+        
         //更新连接
         try {
             std::unique_ptr<sql::Statement> stmt(con->_con->createStatement());
@@ -55,7 +47,7 @@ void SqlConnPool::checkConnection()
             con->_last_oper_time = timestamp;
             LOG_INFO("execute timer alive query ,cur is %d", timestamp);
         } catch (sql::SQLException& e) {
-            LOG_INFO("Error keeping connection alive: %s", e.what());
+            LOG_ERROR("Error keeping connection alive: %s", e.what());
 			//创建新的连接 并替换
 			sql::mysql::MySQL_Driver* driver = sql::mysql::get_mysql_driver_instance();
 			auto* newcon = driver->connect(_url, _user, _pass);
@@ -133,12 +125,17 @@ SqlConnPool::SqlConnPool(const std::string& url, const std::string& user, const 
                 checkConnection();
                 std::this_thread::sleep_for(std::chrono::seconds(300));
             }
-            _check_thread.detach();
         });
+        _check_thread.detach();
     } catch (sql::SQLException& e) {
-        LOG_ERROR(e.what());
+        LOG_ERROR("Error create connection : %s", e.what());
     }
-    
 }
 
-
+SqlConnPool::~SqlConnPool()
+{
+    std::unique_lock<std::mutex> lock(_mutex);
+    while (!_connPool.empty()) {
+        _connPool.pop();
+    }
+}

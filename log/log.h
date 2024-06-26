@@ -1,3 +1,11 @@
+/*
+ * @Author: Jiuchuan jiuchuanfun@gmail.com
+ * @Date: 2024-06-26 17:17:36
+ * @LastEditors: Jiuchuan jiuchuanfun@gmail.com
+ * @LastEditTime: 2024-06-26 22:09:40
+ * @FilePath: /WebServer/log/log.h
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 #ifndef LOG_H
 #define LOG_H
 
