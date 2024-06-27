@@ -5,6 +5,7 @@ TARGET = server
   OBJS = ../log/*.cpp \
 		 ../buffer/*.cpp \
 		 ../pool/*.cpp \
+		 ../timer/*.cpp \
 		 ../main.cpp \
 
 all: $(OBJS)
