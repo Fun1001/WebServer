@@ -2,29 +2,29 @@
  * @Author: Jiuchuan jiuchuanfun@gmail.com
  * @Date: 2024-06-27 14:18:51
  * @LastEditors: Jiuchuan jiuchuanfun@gmail.com
- * @LastEditTime: 2024-06-27 16:26:01
- * @FilePath: /WebServer/timer/heaptimer.cpp
+ * @LastEditTime: 2024-06-27 16:55:28
+ * @FilePath: /WebServer/timer/HeadTimer.cpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
 
-#include "heaptimer.h"
+#include "headtimer.h"
 #include <array>
 #include <cassert>
 #include <chrono>
 #include <cstddef>
 
 
-HeapTimer::HeapTimer()
+HeadTimer::HeadTimer()
 {
     _heap.reserve(64);
 }
 
-HeapTimer::~HeapTimer()
+HeadTimer::~HeadTimer()
 {
     clear();
 }
 
-void HeapTimer::adjust(int id, int newExpires)
+void HeadTimer::adjust(int id, int newExpires)
 {
     /* 调整指定id的结点 */
     assert(!_heap.empty() && _ref.count(id) > 0);
@@ -32,7 +32,7 @@ void HeapTimer::adjust(int id, int newExpires)
     _siftdown(_ref[id], _heap.size());
 }
 
-void HeapTimer::add(int id, int timeOut, const TimeoutCallBack& cb)
+void HeadTimer::add(int id, int timeOut, const TimeoutCallBack& cb)
 {
     assert(id >= 0);
     size_t i;
@@ -54,7 +54,7 @@ void HeapTimer::add(int id, int timeOut, const TimeoutCallBack& cb)
     }
 }
 
-void HeapTimer::doWork(int id)
+void HeadTimer::doWork(int id)
 {
     /* 删除指定id结点，并触发回调函数 */
     if(_heap.empty() || _ref.count(id) == 0){
@@ -66,13 +66,13 @@ void HeapTimer::doWork(int id)
     _del(i);
 }
 
-void HeapTimer::clear()
+void HeadTimer::clear()
 {
     _ref.clear();
     _heap.clear();
 }
 
-void HeapTimer::tick()
+void HeadTimer::tick()
 {
     /* 清除超时结点 */
     if(_heap.empty()){
@@ -88,13 +88,13 @@ void HeapTimer::tick()
     }
 }
 
-void HeapTimer::pop()
+void HeadTimer::pop()
 {
     assert(!_heap.empty());
     _del(0);
 }
 
-int HeapTimer::GetNextTick()
+int HeadTimer::GetNextTick()
 {
     tick();
     size_t res = -1;
@@ -107,7 +107,7 @@ int HeapTimer::GetNextTick()
     return res;
 }
 
-void HeapTimer::_del(size_t index)
+void HeadTimer::_del(size_t index)
 {
     /* 删除指定位置的结点 */
     assert(!_heap.empty() && index >= 0 && index < _heap.size());
@@ -125,7 +125,7 @@ void HeapTimer::_del(size_t index)
     _heap.pop_back();
 }
 
-void HeapTimer::_siftup(size_t i)
+void HeadTimer::_siftup(size_t i)
 {
     assert(i >= 0 && i < _heap.size());
     //获取父节点j
@@ -141,7 +141,7 @@ void HeapTimer::_siftup(size_t i)
     }
 }
 
-bool HeapTimer::_siftdown(size_t index, size_t n)
+bool HeadTimer::_siftdown(size_t index, size_t n)
 {
     assert(index >= 0 && index < _heap.size());
     assert(n >= 0 && n <= _heap.size());
@@ -163,7 +163,7 @@ bool HeapTimer::_siftdown(size_t index, size_t n)
     return i > index;
 }
 
-void HeapTimer::_SwapNode(size_t i, size_t j)
+void HeadTimer::_SwapNode(size_t i, size_t j)
 {
     assert(i >= 0 && i < _heap.size());
     assert(j >= 0 && j < _heap.size());

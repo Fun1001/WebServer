@@ -13,3 +13,4 @@
 *.exe
 /.vscode
 /.cache
+test/build/*

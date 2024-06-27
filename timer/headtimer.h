@@ -1,5 +1,5 @@
-#ifndef __HEAPTIMER_H__
-#define __HEAPTIMER_H__
+#ifndef __HEADTIMER_H__
+#define __HEADTIMER_H__
 
 #include <chrono>
 #include <cstddef>
@@ -21,11 +21,11 @@ struct TimerNode {
     }
 };
 
-class HeapTimer {
+class HeadTimer {
 public:
-    HeapTimer();
+    HeadTimer();
 
-    ~HeapTimer();
+    ~HeadTimer();
 
     //调整已有定时器的过期时间。
     void adjust(int id, int newExpires); 
@@ -66,4 +66,4 @@ private:
 };
 
 
-#endif // __HEAPTIMER_H__
+#endif // __HEADTIMER_H__
