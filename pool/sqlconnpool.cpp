@@ -2,7 +2,7 @@
  * @Author: Jiuchuan jiuchuanfun@gmail.com
  * @Date: 2024-06-24 20:41:16
  * @LastEditors: Jiuchuan jiuchuanfun@gmail.com
- * @LastEditTime: 2024-06-26 23:04:25
+ * @LastEditTime: 2024-07-04 16:00:54
  * @FilePath: /WebServer/pool/sqlconnpool.cpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -138,4 +138,82 @@ SqlConnPool::~SqlConnPool()
     while (!_connPool.empty()) {
         _connPool.pop();
     }
+}
+
+bool MysqlDao::UserVerify(const string &name, const string &pwd, bool isLogin){
+    auto con = _pool->getConn();
+    if (con == nullptr) {
+        return false;
+    }
+
+    Defer defer([this, &con](){
+        _pool->returnConn(std::move(con));
+    });
+
+    try {
+        std::unique_ptr<sql::PreparedStatement> pstmt(con->_con->prepareStatement("SELECT * FROM user WHERE username = ?"));
+        pstmt->setString(1,name);
+
+        std::unique_ptr<sql::ResultSet> res(pstmt->executeQuery());
+        std::string origin_pwd = "";
+        // 遍历结果集
+		while (res->next()) {
+			origin_pwd = res->getString("pwd");
+			// 输出查询到的密码
+			LOG_INFO("pwd is: %s", origin_pwd.c_str());
+			break;
+		}
+
+        if (pwd != origin_pwd) {
+            return  false;
+        }
+        return true;
+    } catch (sql::SQLException& e) {
+        LOG_ERROR("SQLException: %s", e.what());
+        LOG_ERROR("MySQL error code: : %d", e.getErrorCode());
+        LOG_ERROR("SQLState: %s", e.getSQLState().c_str());
+		return false;
+    }
+}
+
+bool MysqlDao::Regirster(const string &name, const string &pwd){
+    auto con = _pool->getConn();
+	try {
+		if (con == nullptr) {
+			return false;
+		}
+
+        Defer defer([this, &con](){
+        _pool->returnConn(std::move(con));
+        });
+		// 准备调用存储过程
+		std::unique_ptr<sql::PreparedStatement> stmt(con->_con->prepareStatement("CALL reg_user(?,?,@result)"));
+		// 设置输入参数
+		stmt->setString(1, name);
+		stmt->setString(2, pwd);
+
+		// 由于PreparedStatement不直接支持注册输出参数，我们需要使用会话变量或其他方法来获取输出参数的值
+
+		  // 执行存储过程
+		stmt->execute();
+		// 如果存储过程设置了会话变量或有其他方式获取输出参数的值，你可以在这里执行SELECT查询来获取它们
+	    // 例如，如果存储过程设置了一个会话变量@result来存储输出结果，可以这样获取：
+	    unique_ptr<sql::Statement> stmtResult(con->_con->createStatement());
+	    unique_ptr<sql::ResultSet> res(stmtResult->executeQuery("SELECT @result AS result"));
+	  if (res->next()) {
+        int result = res->getInt("result");
+        return result;
+	  }
+        return false;
+	}
+	catch (sql::SQLException& e) {
+		std::cerr << "SQLException: " << e.what();
+		std::cerr << " (MySQL error code: " << e.getErrorCode();
+		std::cerr << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+		return false;
+	}
+}
+
+MysqlDao::~MysqlDao() {
+    // 析构函数实现，如果不需要特殊操作，可以留空
 }

@@ -2,17 +2,16 @@
  * @Author: Jiuchuan jiuchuanfun@gmail.com
  * @Date: 2024-06-24 17:14:25
  * @LastEditors: Jiuchuan jiuchuanfun@gmail.com
- * @LastEditTime: 2024-06-27 17:13:32
+ * @LastEditTime: 2024-07-04 16:07:07
  * @FilePath: /WebServer/test/test.cpp
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
 #include "../log/log.h"
-#include "../pool/sqlconnpool.h"
-#include "mysql_connection.h"  // 或者具体的包含 PreparedStatement 的头文件
-#include <cppconn/prepared_statement.h>
-#include <cppconn/resultset.h>
-#include <cppconn/statement.h>
-#include <cppconn/exception.h>
+#include "../pool/mysqlMgr.h" 
+// #include <cppconn/prepared_statement.h>
+// #include <cppconn/resultset.h>
+// #include <cppconn/statement.h>
+// #include <cppconn/exception.h>
 #include <gtest/gtest.h>
 // #include "../code/pool/threadpool.h"
 #include <cstddef>
@@ -180,4 +179,19 @@ TEST_F(HeadTimerTest, Pop) {
     timer.tick();
 
     EXPECT_FALSE(callbackCalled);
+}
+
+void testSQLLogin(){
+    Log::GetInstance()->init(0, "./testSqlLogin", ".log", 5000);
+    bool testReg = MysqlMgr::GetInstance()->Regirster("jiuchuan", "123");
+    if (!testReg) {
+        LOG_ERROR("Reg false!");
+        return;
+    }
+    LOG_ERROR("Reg success!");
+    
+}
+
+int main(){
+    testSQLLogin();
 }

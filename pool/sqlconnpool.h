@@ -2,7 +2,7 @@
  * @Author: Jiuchuan jiuchuanfun@gmail.com
  * @Date: 2024-06-24 20:38:01
  * @LastEditors: Jiuchuan jiuchuanfun@gmail.com
- * @LastEditTime: 2024-06-26 21:48:54
+ * @LastEditTime: 2024-07-04 15:12:19
  * @FilePath: /WebServer/pool/sqlconnpool.h
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -13,6 +13,7 @@
 #include <condition_variable>
 #include <memory>
 #include <mysql_driver.h>
+#include <cppconn/prepared_statement.h>
 #include <string>
 #include <queue>
 #include <mutex>
@@ -55,6 +56,19 @@ private:
     std::atomic<bool> _b_stop;
 
     std::thread _check_thread;//数据库保活线程
+};
+
+class MysqlDao
+{
+public:
+	MysqlDao(){
+        _pool = std::make_shared<SqlConnPool>("10.53.11.133:3306", "root", "123456", "testWebDB", std::thread::hardware_concurrency() / 2);
+    }
+	~MysqlDao();
+    bool UserVerify(const string &name, const string &pwd, bool isLogin);
+    bool Regirster(const string &name, const string &pwd);
+private:
+	std::shared_ptr<SqlConnPool> _pool;
 };
 
 #endif // __SQLCONNPOOL_H__

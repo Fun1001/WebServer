@@ -7,6 +7,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -Wall -g")
 # 添加需要链接的库
 find_package(Threads REQUIRED)
 find_library(MYSQLCPPCONN_LIB mysqlcppconn)
+find_package(nlohmann_json 3.10.5 REQUIRED)
 
 # 添加Google Test子模块
 find_package(GTest REQUIRED)
@@ -38,4 +39,5 @@ target_link_libraries(test
     ${MYSQLCPPCONN_LIB}
     GTest::GTest
     GTest::Main
+    nlohmann_json::nlohmann_json
 )
