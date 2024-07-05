@@ -4,6 +4,7 @@
 #include <bits/types/struct_iovec.h>
 #include <cassert>
 #include <cstdint>
+#include <memory>
 #include <sys/uio.h>
 #include <unistd.h>
 
@@ -104,7 +105,7 @@ sockaddr_in HttpConn::GetAddr() const
 
 bool HttpConn::process()
 {
-    _request = new HttpRequest();
+    _request = std::make_shared<HttpRequest>();
     if(_readBuff.ReadableBytes() <=0){
         return false;
     }
